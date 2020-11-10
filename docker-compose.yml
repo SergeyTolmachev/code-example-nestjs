@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  item:
+    build:
+      context: ./item
+    env_file: ./item/item.env
+    environment:
+      - 'RUN_ENV=development'
+    volumes:
+      - ./item:/home/node/item
+    ports:
+      - 3000:3000
+    depends_on:
+      - item-db
+      - redis
+      - item-sqs
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+  item-db:
+    image: registry:443/item-db:latest
+    ports:
+      - 3306:3306
+  item-sqs:
+    image: roribio16/alpine-sqs
+    ports:
+      - 9324:9324
+      - 9325:9325
+    volumes:
+      - ./elasticmq.conf:/opt/config/elasticmq.conf
+networks:
+  default:
+    name: ${DOCKER_NETWORK}
